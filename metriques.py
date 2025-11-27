@@ -2,11 +2,10 @@ import statistics
 
 def calculer_satisfaction_etudiants(etudiants):
     """
-    Calcule les statistiques de satisfaction pour les étudiants.
-    Retourne : Rang moyen, Regret Max, Ecart-type, Distribution.
+    Calcule les statistiques de satisfaction pour les étudiants
     """
     nb_etudiants_total = len(etudiants)
-    rangs_obtenus = [] # On stocke la liste brute pour les stats avancées
+    rangs_obtenus = [] 
 
     for etudiant in etudiants:
         if etudiant.etablissement_affecte is None:
@@ -17,18 +16,16 @@ def calculer_satisfaction_etudiants(etudiants):
         rang = etudiant.liste_voeux.index(etablissement_obtenu) + 1
         rangs_obtenus.append(rang)
             
-    # Calculs statistiques
     if rangs_obtenus:
         rang_moyen = statistics.mean(rangs_obtenus)
         regret_max = max(rangs_obtenus) # Le pire classement obtenu
-        # Ecart-type (si n > 1)
+        # ecart-type (si n > 1 car sinon on a division par 0)
         ecart_type = statistics.stdev(rangs_obtenus) if len(rangs_obtenus) > 1 else 0.0
     else:
         rang_moyen = 0
         regret_max = 0
         ecart_type = 0
 
-    # Distribution (Histogramme)
     distribution_rangs = {i: 0 for i in range(1, len(etudiants[0].liste_voeux) + 1)}
     for r in rangs_obtenus:
         if r in distribution_rangs:
@@ -46,7 +43,7 @@ def calculer_satisfaction_etudiants(etudiants):
 
 def calculer_satisfaction_etablissements(etablissements):
     """
-    Calcule les statistiques pour les établissements.
+    Calcule les statistiques pour les établissements
     """
     rangs_obtenus = []
     
@@ -80,7 +77,6 @@ def compter_paires_instables(etudiants, etablissements):
     """
     Vérifie la stabilité
     théoriquement on doit avoir 0 paires instables pour GS
-    Retourne le nombre de paires (etudiant, etablissement) qui bloqueraient le système.
     """
     nb_instabilites = 0
     

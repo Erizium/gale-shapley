@@ -3,11 +3,12 @@ import gale_shapley
 import metriques
 import matplotlib.pyplot as plt
 import math
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 
 
-# ==========================================
-# GÉNÉRATEURS DE SCÉNARIOS (PIRE, MOYEN, MEILLEUR CAS)
-# ==========================================
+
+# GENERATION PIRE ET MEILLEUR CAS
 
 def generer_meilleur_cas(N):
     """
@@ -45,12 +46,12 @@ def generer_pire_cas(N):
     etudiants = [generation_preferences.Etudiant(i) for i in range(N)]
     etablissements = [generation_preferences.Etablissement(j, capacite=1) for j in range(N)]
     
-    # Etudiants : Conflit maximal (tout le monde veut les mêmes écoles dans le même ordre)
+    # etudiants : CONFLIT MAX (tout le monde veut les mêmes écoles dans le même ordre)
     liste_ecoles_conflit = [etablissements[j] for j in range(N)]
     for etu in etudiants:
         etu.liste_voeux = list(liste_ecoles_conflit)
         
-    # Etablissements : Préférences inversées par rapport aux préférences des étudiants
+    # etablissement : PREF INVERSES par rapport aux préférences des étudiants
     # Ils préfèrent tous les étudiants qui postuleront en dernier
     liste_etudiants_inverse = [etudiants[i] for i in range(N-1, -1, -1)]
     for etab in etablissements:
@@ -58,9 +59,8 @@ def generer_pire_cas(N):
         
     return etudiants, etablissements
 
-# ==========================================
+
 # ANALYSE ET PLOT
-# ==========================================
 
 def analyse_complete_complexite():
     """
@@ -78,12 +78,12 @@ def analyse_complete_complexite():
     print("\n--- Lancement de l'Analyse Asymptotique (Nombre d'itérations) ---")
     
     for N in tailles_N:
-        # 1. Meilleur Cas
+        #MEILLEUR CAS
         E, S = generer_meilleur_cas(N)
         iter_best = gale_shapley.mariage_stable_etudiant_proposant(E, S)
         res_meilleur.append(iter_best)
         
-        # 2. Cas Moyen (on va faire une moyenne sur 10 itérations pour lisser l'aléatoire)
+        #CAS MOYEN (on va faire une moyenne sur 10 itérations pour lisser)
         somme = 0
         nb_essais = 10
         for _ in range(nb_essais):
@@ -91,36 +91,38 @@ def analyse_complete_complexite():
             somme += gale_shapley.mariage_stable_etudiant_proposant(E, S)
         res_moyen.append(somme / nb_essais)
         
-        # 3. Pire Cas
+        #Pire Cas
         E, S = generer_pire_cas(N)
         iter_worst = gale_shapley.mariage_stable_etudiant_proposant(E, S)
         res_pire.append(iter_worst)
         
         print(f" Nb itérations pour N={N} étudiants: Meilleur={iter_best} | Moyen={res_moyen[-1]:.1f} | Pire={iter_worst}")
 
-    # ================= PLOT =================
+
+    # PLOTS DES COMPLEXITES
+
     plt.figure(figsize=(12, 8))
     
-    # Courbes experimentales
+    #  courbes experimentales
     plt.plot(tailles_N, res_pire, 's-', color='#e74c3c', label='Pire Cas (Expérimental)', linewidth=2)
     plt.plot(tailles_N, res_moyen, 'o-', color='#3498db', label='Cas Moyen (Expérimental)', linewidth=2)
     plt.plot(tailles_N, res_meilleur, '^-', color='#2ecc71', label='Meilleur Cas (Expérimental)', linewidth=2)
     
-    # Courbes théoriques en pointillés
+    # coubres théoriques en pointillés
     
-    # Théorie N^2/2 (somme arithmétique observée dans le pire cas)
+    # théorie N^2/2 (somme arithmétique observée dans le pire cas)
     y_n2 = [(n*n)/2 for n in tailles_N]
     plt.plot(tailles_N, y_n2, '--', color='maroon', alpha=0.6, label=r'Théorie $O(N^2/2)$')
     
-    # Théorie N log N (approximation de Knuth)
-    # On ajoute un coefficient k ajusté sur le dernier point pour superposer les échelles
+    # théorie N log N 
+    # on ajoute un coefficient k ajusté sur le dernier point pour superposer les échelles
     if tailles_N[-1] > 0:
         val_ref = tailles_N[-1] * math.log(tailles_N[-1])
         k = res_moyen[-1] / val_ref
         y_nlogn = [k * n * math.log(n) for n in tailles_N]
         plt.plot(tailles_N, y_nlogn, '--', color='navy', alpha=0.6, label=r'Théorie $O(N \ln N)$')
     
-    # Théorie N (Meilleur cas)
+    # théorie N (Meilleur cas)
     y_n = [n for n in tailles_N]
     plt.plot(tailles_N, y_n, '--', color='darkgreen', alpha=0.6, label=r'Théorie $O(N)$')
 
@@ -136,14 +138,14 @@ def analyse_complete_complexite():
 
 def analyse_ratio_tension():
     """
-    Analyse fine de l'impact du ratio N/M sur la satisfaction.
-    Focus sur la zone de transition autour de 1.
+    Analyse fine de l'impact du ratio N/M sur la satisfaction
+    Focus sur la zone de transition autour de 1
     """
     M = 50 # on prend un M raisonnable pour avoir de la granularité
     
-    # On teste des ratios de 0.5 (sous-tension) à 2.5 (sur-tension)
-    # Ex: 0.5 -> 25 étudiants pour 50 places
-    # Ex: 2.0 -> 100 étudiants pour 50 places
+    # on teste des ratios de 0.5 (sous-tension) à 2.5 (sur-tension)
+    # EX: 0.5 -> 25 étudiants pour 50 places
+    # EX: 2.0 -> 100 étudiants pour 50 places
     ratios = [x / 10.0 for x in range(5, 30, 2)] # [0.5, 0.7, ..., 2.9]
     
     rangs_moyens = []
@@ -159,18 +161,18 @@ def analyse_ratio_tension():
         stats = metriques.calculer_satisfaction_etudiants(E)
         rangs_moyens.append(stats['rang_moyen'])
         
-        # On calcule le nombre d'étudiants qui ont eu leur 1er vœu
+        # calcule le nombre d'étudiants qui ont eu leur 1er vœu
         nb_v1 = stats['distribution_rangs'].get(1, 0)
-        # Nombre total d'étudiants affectés
+        # nb total d'étudiants affectés
         nb_affectes = len(E) - stats['nb_non_affectes']
-        # Pourcentage de satisfaction (ceux qui ont eu leur 1er vœu)
+        # % de satisfaction (ceux qui ont eu leur 1er vœu)
         pourcentage = (nb_v1 / nb_affectes * 100) if nb_affectes > 0 else 0.0
         pourcentage_satisfaction.append(pourcentage)
         
         print(f"Ratio={r:.1f} (N={N}/M={M}): Rang Moyen={stats['rang_moyen']:.2f} | % 1er vœu={pourcentage:.1f}% ({nb_v1}/{nb_affectes})")
 
-    # Plot avec double axe Y : Rang moyen et Pourcentage de satisfaction
-    fig, ax1 = plt.subplots(figsize=(12, 7))
+    # Plot avec double axe Y : Rang moyen et % de satisfaction
+    _, ax1 = plt.subplots(figsize=(12, 7))
     
     # Premier axe Y : Rang moyen
     color1 = 'purple'
@@ -180,7 +182,7 @@ def analyse_ratio_tension():
     ax1.tick_params(axis='y', labelcolor=color1)
     ax1.grid(True, alpha=0.3)
     
-    # Deuxième axe Y : Pourcentage de satisfaction (1er vœu)
+    # Deuxième axe Y : % de satisfaction (1er vœu)
     ax2 = ax1.twinx()
     color2 = 'teal'
     ax2.set_ylabel('% Étudiants ayant obtenu leur 1er vœu', color=color2, fontsize=12)
@@ -192,17 +194,16 @@ def analyse_ratio_tension():
     ax1.axvline(x=1.0, color='red', linestyle='--', linewidth=2, alpha=0.7, zorder=0)
     ax1.axvspan(0.5, 1.0, alpha=0.1, color='green', zorder=0)
     ax1.axvspan(1.0, max(ratios), alpha=0.1, color='orange', zorder=0)
+
     # Annotation pour le point de bascule
     ax1.text(1.0, ax1.get_ylim()[1] * 0.95, 'N=M', rotation=90, 
              verticalalignment='top', horizontalalignment='right', 
              color='red', fontweight='bold', fontsize=10)
     
-    # Titre
     ax1.set_title('Transition de phase : Impact de la tension sur la satisfaction', fontsize=14, fontweight='bold')
     
     # Légende combinée pour les deux axes + zones
-    from matplotlib.patches import Patch
-    from matplotlib.lines import Line2D
+
     lines = line1 + line2
     labels = [l.get_label() for l in lines]
     # Ajouter les zones et la ligne de bascule à la légende
@@ -278,7 +279,7 @@ def analyse_impact_structurel():
     ax.set_ylabel('Rang Moyen (Satisfaction)')
     ax.set_title(f'Impact de la granularité de l\'offre (N={N}, Places={places_totales})')
     
-    # Annotations pour comprendre le graph
+    # annotations pour comprendre le graph
     ax.text(capacites_x[0], rangs_moyens_y[0]+0.5, "Marché Fragmenté\n(Bcp de petites écoles)", ha='left')
     ax.text(capacites_x[-1], rangs_moyens_y[-1]+0.5, "Marché Centralisé\n(Peu de grosses écoles)", ha='right')
     

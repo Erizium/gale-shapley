@@ -87,19 +87,19 @@ def _generer_preferences_correlees(etudiants, etablissements, strength):
     Génération corrélée (cf rapport pour plus de détails)
     strength : 0 -> bruit total (aléatoire), 1 -> bruit nul (tout le monde a le même classement)
     """
-    # On attribue un 'score de qualité' intrinsèque à chaque entité (0 à 1)
+    # on attribue un 'score de qualité' intrinsèque à chaque entité (0 à 1)
     # plus le score est haut, plus l'entité est désirable
     scores_etudiants = {e.id: random.random() for e in etudiants}
     scores_etablissements = {s.id: random.random() for s in etablissements}
 
-    # Fonction utilitaire pour trier avec bruit
+    # fct utilitaire pour trier avec bruit
     def get_noisy_score(base_score, noise_factor):
         # le bruit réduit l'impact du score de base
-        # noise_factor grand (strength petit) -> classement chaotique
+        # noise_factor grand (strength petit) => classement chaotique
         bruit = random.gauss(0, 1) * (1 - strength) 
         return base_score * strength + bruit
 
-    # Préférences des étudiants (classent les établissements par score décroissant + bruit)
+    # prefs des étudiants (classent les établissements par score décroissant + bruit)
     for etu in etudiants:
         # on calcule un score perçu pour chaque établissement
         etab_scores = []
@@ -111,7 +111,7 @@ def _generer_preferences_correlees(etudiants, etablissements, strength):
         etab_scores.sort(key=lambda x: x[1], reverse=True)
         etu.liste_voeux = [x[0] for x in etab_scores]
 
-    # Préférences des établissements (classent les étudiants par score décroissant + bruit)
+    # prefs des établissements (classent les étudiants par score décroissant + bruit)
     for etab in etablissements:
         etu_scores = []
         for etu in etudiants:

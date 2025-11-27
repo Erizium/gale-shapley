@@ -9,13 +9,14 @@ def executer_test(nom_test, nb_etudiants, nb_etablissements, capacites, mode_gen
     print(f"--- Lancement du {nom_test} ---")
     print(f"Config: {nb_etudiants} étudiants, {nb_etablissements} facs, Capacité {capacites}, Mode {mode_gen}")
 
-    # 1. Génération des données
+    # on génère les données
     etudiants, etablissements = generation_preferences.generer_donnees(
         nb_etudiants, nb_etablissements, capacites, mode=mode_gen, correlation_strength=correlation_strength
     )
-    
     # =========================================================
-    # 2. Algo 1 : Etudiant Proposant (GS-Student)
+    # =========================================================
+    # Algo 1 : Etudiant Proposant (GS-Student)
+    # =========================================================
     # =========================================================
     print("\n-> Exécution Gale-Shapley (Etudiant Proposant)...")
     gale_shapley.mariage_stable_etudiant_proposant(etudiants, etablissements)
@@ -37,8 +38,11 @@ def executer_test(nom_test, nb_etudiants, nb_etablissements, capacites, mode_gen
     print(f"Regret max établissements: {stats_univ_dans_gs_etu['regret_max']}")
     print(f"Ecart-type établissements: {stats_univ_dans_gs_etu['ecart_type']:.2f}")
 
+
     # =========================================================
-    # 3. Algo 2 : Université Proposant (GS-Univ)
+    # =========================================================
+    # Algo 2 : Université Proposant (GS-Univ)
+    # =========================================================
     # =========================================================
     print("\n-> Exécution Gale-Shapley (Univ Proposant)...")
     gale_shapley.mariage_stable_universite_proposant(etudiants, etablissements)
@@ -79,34 +83,34 @@ def executer_test(nom_test, nb_etudiants, nb_etablissements, capacites, mode_gen
 if __name__ == "__main__":
     resultats_globaux = []
     
-    # --- CAS 1 : Equilibre (Le cas témoin pour voir l'asymétrie) ---
+    # CAS 1 : Equilibre (Le cas témoin pour voir l'asymétrie) 
     N = 50
     res1 = executer_test("CAS 1 - Bijection (N=50)", nb_etudiants=N, nb_etablissements=N, capacites=1)
     resultats_globaux.append(res1)
     
-    # --- CAS 2 : Tension (plus d'étudiants que de places) ---
+    # CAS 2 : Tension (plus d'étudiants que de places) 
     N = 50
     M = 20
     res2 = executer_test("CAS 2 - Tension (N=50, M=20)", nb_etudiants=N, nb_etablissements=M, capacites=1)
     resultats_globaux.append(res2)
 
-    # --- CAS 3 : Etablissements Selectifs ---
+    # CAS 3 : Etablissements Selectifs 
     N = 50
     M = 10
     caps = [random.randint(2, 3) for _ in range(M)] 
     res3 = executer_test("CAS 3 - Selectifs (N=50, M=10)", nb_etudiants=N, nb_etablissements=M, capacites=caps)
     resultats_globaux.append(res3)
 
-    # --- CAS 4 : Etablissements Non Selectifs ---
+    # CAS 4 : Etablissements Non Selectifs 
     N = 50
     M = 10
     caps = [random.randint(6, 8) for _ in range(M)] 
     res4 = executer_test("CAS 4 - Non Selectifs (N=50, M=10)", nb_etudiants=N, nb_etablissements=M, capacites=caps)
     resultats_globaux.append(res4)
     
-    # --- CAS 5 : Compétition Forte ---
+    #  CAS 5 : Compétition Forte 
     res5 = executer_test("CAS 5 - Correlé (N=50)", nb_etudiants=50, nb_etablissements=20, capacites=1, mode_gen='correlee', correlation_strength=0.9)
     resultats_globaux.append(res5)
 
-    # Affichage de l'analyse croisée finale
+    # Analyse croisée finale
     plots.afficher_analyse_croisee(resultats_globaux)
