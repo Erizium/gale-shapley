@@ -1,14 +1,13 @@
 import matplotlib.pyplot as plt
-
+import numpy as np 
 def afficher_comparaison_rangs(distrib_etu_prop, distrib_univ_prop, titre):
     """
     Affiche un histogramme comparant les rangs obtenus par les étudiants
     selon qui propose (Etudiant ou Université).
     """
-    # on récupère tous les rangs possibles (les clés des dictionnaires)
+    # on récupère tous les rangs possibles (cf set pour avoir les rangs uniques)
     rangs = sorted(list(set(distrib_etu_prop.keys()) | set(distrib_univ_prop.keys())))
     
-    # on prépare les listes pour le plot
     valeurs_etu = [distrib_etu_prop.get(r, 0) for r in rangs]
     valeurs_univ = [distrib_univ_prop.get(r, 0) for r in rangs]
     
@@ -42,9 +41,6 @@ def afficher_comparaison_rangs(distrib_etu_prop, distrib_univ_prop, titre):
     plt.savefig(f'{titre}.png')
     plt.show()
 
-
-import matplotlib.pyplot as plt
-import numpy as np # Utile pour gérer les positions des barres proprement
 
 def afficher_comparaison_rangs(distrib_etu_prop, distrib_univ_prop, titre):
     """
@@ -100,13 +96,13 @@ def afficher_analyse_croisee(resultats_complets):
 
     fig, ax = plt.subplots(figsize=(12, 7))
     
-    # Barres pour les étudiants (Teintes de Bleu)
-    rects1 = ax.bar(x - 1.5*width, etu_gs_etu, width, label='Satisfaction Etu (si Etu Propose)', color='#3498db')
-    rects2 = ax.bar(x - 0.5*width, etu_gs_univ, width, label='Satisfaction Etu (si Univ Propose)', color='#aed6f1')
+    # barres pour les étudiants ( bleu)
+    ax.bar(x - 1.5*width, etu_gs_etu, width, label='Satisfaction Etu (si Etu Propose)', color='#3498db')
+    ax.bar(x - 0.5*width, etu_gs_univ, width, label='Satisfaction Etu (si Univ Propose)', color='#aed6f1')
     
-    # Barres pour les universités (Teintes de Rouge)
-    rects3 = ax.bar(x + 0.5*width, univ_gs_etu, width, label='Satisfaction Univ (si Etu Propose)', color='#f5b7b1')
-    rects4 = ax.bar(x + 1.5*width, univ_gs_univ, width, label='Satisfaction Univ (si Univ Propose)', color='#e74c3c')
+    # barres pour les universités (rouge)
+    ax.bar(x + 0.5*width, univ_gs_etu, width, label='Satisfaction Univ (si Etu Propose)', color='#f5b7b1')
+    ax.bar(x + 1.5*width, univ_gs_univ, width, label='Satisfaction Univ (si Univ Propose)', color='#e74c3c')
 
     ax.set_ylabel('Rang Moyen (plus bas = meilleur)')
     ax.set_title('Validation Théorique : Comparaison Croisée des Satisfactions')

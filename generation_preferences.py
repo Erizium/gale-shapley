@@ -8,21 +8,21 @@ class Etudiant:
         self.id = id_etudiant
         self.nom = f"Etu_{id_etudiant}"
         self.liste_voeux = [] # liste des préférences des étudiants
-        self.etablissement_affecte = None # Pour stocker l'affectation finale
+        self.etablissement_affecte = None # stocker l'affectation finale
 
     def __repr__(self):
         return f"{self.nom}"
         
 class Etablissement:
     """
-    Représente un établissement avec capacité d'accueil.
+    Représente un établissement avec capacité d'accueil
     """
     def __init__(self, id_etab, capacite=1, nom=""):
         self.id = id_etab
         self.nom = f"Univ_{id_etab}"
         self.capacite = capacite
-        self.liste_voeux = [] # Liste des étudiants préférés ordonnés
-        self.etudiants_affectes = [] # Liste des étudiants actuellement acceptés
+        self.liste_voeux = [] # liste des étudiants préférés ordonnés
+        self.etudiants_affectes = [] # liste des étudiants actuellement acceptés
 
     def est_plein(self):
         """Retourne Vrai si l'établissement a atteint sa capacité maximale."""
@@ -30,9 +30,8 @@ class Etablissement:
 
     def pire_etudiant_actuel(self):
         """
-        Retourne l'étudiant le moins bien classé parmi ceux actuellement affectés.
-        Suppose que self.etudiants_affectes est tenu à jour ou qu'on peut le déduire.
-        Ici, on utilisera l'index dans la liste de voeux pour comparer.
+        Retourne l'étudiant le moins bien classé parmi ceux actuellement affectés
+        Ici, on utilisera l'index dans la liste de voeux pour comparer
         """
         if not self.etudiants_affectes:
             return None
@@ -47,20 +46,9 @@ class Etablissement:
 def generer_donnees(nb_etudiants, nb_etablissements, capacites, mode='aleatoire', correlation_strength=0.0):
     """
     Génère les objets Etudiants et Etablissements avec leurs préférences.
-    
-    Args:
-        nb_etudiants (int): Nombre d'étudiants
-        nb_etablissements (int): Nombre d'universités
-        capacites (list ou int): Si int, capacité identique pour tous. Si list, capacité par étab.
-        mode (str): 'aleatoire' (uniforme) ou 'correlee'
-        correlation_strength (float): Entre 0 (aléatoire) et 1 (parfaitement corrélé).
-                                      Utilisé uniquement si mode='correlee'.
-    
-    Returns:
-        tuple: (liste_etudiants, liste_etablissements)
     """
     
-    # 1. on instancie les étudiants et les établissements
+    # on instancie les étudiants et les établissements
     etudiants = [Etudiant(i) for i in range(nb_etudiants)]
     etablissements = []
     
@@ -68,27 +56,27 @@ def generer_donnees(nb_etudiants, nb_etablissements, capacites, mode='aleatoire'
         cap = capacites if isinstance(capacites, int) else capacites[j]
         etablissements.append(Etablissement(j, capacite=cap))
 
-    # 2. on génère les preferences en fonction du mode
+    # on génère les preferences en fonction du mode
     if mode == 'aleatoire':
         _generer_preferences_uniformes(etudiants, etablissements)
     elif mode == 'correlee':
         _generer_preferences_correlees(etudiants, etablissements, correlation_strength)
     else:
-        raise ValueError("Mode inconnu. Choisir 'aleatoire' ou 'correlee'.")
+        raise ValueError("Mode inconnu. Choisir 'aleatoire' ou 'correlee' !!")
 
     return etudiants, etablissements
 
 def _generer_preferences_uniformes(etudiants, etablissements):
     """
-    Génération aléatoire uniforme : chaque permutation a la même probabilité.
+    Génération aléatoire uniforme : chaque permutation a la même proba
     """
-    # Pour chaque étudiant, on mélange la liste des établissements
+    # pour chaque étudiant, on mélange la liste des établissements
     for etu in etudiants:
         voeux = list(etablissements)
         random.shuffle(voeux)
         etu.liste_voeux = voeux
 
-    # Pour chaque établissement, on mélange la liste des étudiants
+    # pour chaque établissement, on mélange la liste des étudiants
     for etab in etablissements:
         voeux = list(etudiants)
         random.shuffle(voeux)
@@ -96,24 +84,24 @@ def _generer_preferences_uniformes(etudiants, etablissements):
 
 def _generer_preferences_correlees(etudiants, etablissements, strength):
     """
-    Génération corrélée basée sur des scores latents.
+    Génération corrélée (cf rapport pour plus de détails)
     strength : 0 -> bruit total (aléatoire), 1 -> bruit nul (tout le monde a le même classement)
     """
     # On attribue un 'score de qualité' intrinsèque à chaque entité (0 à 1)
-    # Plus le score est haut, plus l'entité est désirable
+    # plus le score est haut, plus l'entité est désirable
     scores_etudiants = {e.id: random.random() for e in etudiants}
     scores_etablissements = {s.id: random.random() for s in etablissements}
 
     # Fonction utilitaire pour trier avec bruit
     def get_noisy_score(base_score, noise_factor):
-        # Le bruit réduit l'impact du score de base
+        # le bruit réduit l'impact du score de base
         # noise_factor grand (strength petit) -> classement chaotique
         bruit = random.gauss(0, 1) * (1 - strength) 
         return base_score * strength + bruit
 
     # Préférences des étudiants (classent les établissements par score décroissant + bruit)
     for etu in etudiants:
-        # On calcule un score perçu pour chaque établissement
+        # on calcule un score perçu pour chaque établissement
         etab_scores = []
         for etab in etablissements:
             perceived_value = get_noisy_score(scores_etablissements[etab.id], strength)
